@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map-to-3D Studio | Interactive Editor</title>
+    <link rel="stylesheet" href="/static/assets/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- Layout & Grid --- */
+        body { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+       
+        .app-header {
+        background: #ffffff;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 0 2rem;
+        height: 70px; /* ارتفاع ثابت و استاندارد */
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02); /* سایه بسیار محو */
+        z-index: 50;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .brand-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        letter-spacing: -0.5px;
+    }
+    
+    .brand-icon {
+        color: var(--primary);
+        font-size: 1.4rem;
+    }
+
+    .project-breadcrumb {
+        font-size: 0.85rem;
+        color: #64748b;
+        background: #f1f5f9;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-weight: 500;
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    /* دکمه‌های مدرن */
+    .btn-header {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid transparent;
+    }
+
+    /* دکمه اصلی (Save All/Walls) */
+    .btn-primary-header {
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+    }
+    .btn-primary-header:hover {
+        background: var(--primary-hover);
+        transform: translateY(-1px);
+    }
+
+    /* دکمه‌های ثانویه (Load, Export) */
+    .btn-secondary-header {
+        background: white;
+        border-color: #e2e8f0;
+        color: #475569;
+    }
+    .btn-secondary-header:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #1e293b;
+    }
+
+    /* دکمه خاص (Save Rooms) - پیشنهاد: استفاده از رنگ متمایز اما ملایم */
+    .btn-accent-header {
+        background: #0f172a; /* سرمه‌ای تیره برای تمایز */
+        color: white;
+    }
+    .btn-accent-header:hover {
+        background: #1e293b;
+    }
+
+    /* جداکننده عمودی */
+    .divider-v {
+        width: 1px;
+        height: 24px;
+        background: #e2e8f0;
+        margin: 0 8px;
+    }
+
+    .settings-group {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .setting-item {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .setting-label-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.8rem;
+        color: #94a3b8; /* رنگ متن لیبل */
+        font-weight: 500;
+    }
+
+    .setting-value {
+        color: #e2e8f0; /* رنگ متن عدد */
+        font-family: monospace; /* فونت مونو برای اعداد */
+        background: rgba(255, 255, 255, 0.1);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+    }
+
+    /* استایل اسلایدر مدرن */
+    input[type=range].modern-slider {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 6px;
+        background: #334155; /* رنگ پس‌زمینه 트랙 */
+        border-radius: 5px;
+        outline: none;
+        transition: background 0.2s;
+    }
+
+    /* دستگیره اسلایدر (Thumb) - Webkit (Chrome/Safari) */
+    input[type=range].modern-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--primary); /* رنگ آبی اصلی پروژه */
+        cursor: pointer;
+        box-shadow: 0 0 10px rgba(37, 99, 235, 0.5); /* درخشش دور دکمه */
+        transition: transform 0.1s;
+    }
+
+    input[type=range].modern-slider::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+        background: #60a5fa;
+    }
+
+    /* دستگیره اسلایدر - Firefox */
+    input[type=range].modern-slider::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--primary);
+        cursor: pointer;
+        border: none;
+        box-shadow: 0 0 10px rgba(37, 99, 235, 0.5);
+    }
+
+
+       .header-controls { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        
+        /* Sliders in Header */
+        .slider-group { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-muted); }
+        .slider-group input[type="range"] { width: 100px; accent-color: var(--primary); cursor: pointer; }
+
+        /* Main Workspace */
+        .workspace {
+            display: flex;
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: var(--background);
+        }
+
+        /* Canvas Area */
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .canvas-wrapper {
+            width: 100%;
+            height: 100%;
+            background: #f1f5f9;
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.02);
+        }
+
+        canvas { display: block; cursor: crosshair; }
+
+        /* Floating Toolbox */
+        .floating-toolbox {
+            position: absolute;
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--surface);
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 40;
+            border: 1px solid var(--border);
+        }
+
+        .tool-btn {
+            width: 40px; height: 40px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+        }
+        .tool-btn:hover { background: var(--background); color: var(--primary); }
+        .tool-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); }
+        .tool-divider { height: 1px; background: var(--border); margin: 2px 0; }
+
+        /* Right Sidebar (Objects) */
+        .objects-panel {
+            width: 320px;
+            background: #0f172a; /* Dark theme from your CSS */
+            color: #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 1px solid #1e293b;
+            position: relative;
+            z-index: 45;
+        }
+
+        .objects-panel.collapsed { width: 0; min-width: 0; overflow: hidden; border: none; }
+
+        .panel-header {
+            padding: 1.2rem;
+            border-bottom: 1px solid #1e293b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: white;
+        }
+
+        .panel-content { flex: 1; overflow-y: auto; padding: 1rem; }
+        
+        /* Collapsible Sections inside Panel */
+        .accordion-item { margin-bottom: 1rem; border: 1px solid #1e293b; border-radius: 8px; overflow: hidden; background: #1e293b; }
+        .accordion-header {
+            padding: 10px 15px;
+            background: #1e293b;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #94a3b8;
+            transition: background 0.2s;
+        }
+        .accordion-header:hover { background: #334155; color: white; }
+        .accordion-header i { transition: transform 0.3s; }
+        .accordion-header.active i { transform: rotate(180deg); }
+        
+        .accordion-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background: #0f172a;
+        }
+        .accordion-body.open { max-height: 500px; /* Arbitrary large number */ overflow-y: auto; }
+        
+        .accordion-content { padding: 10px; }
+
+        /* Toggle Button for Panel */
+        .panel-toggle-btn {
+            position: absolute;
+            right: 320px; /* Exactly at the left edge of the panel (when open) */
+            top: 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            width: 30px; height: 30px;
+            border-radius: 6px 0 0 6px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            color: var(--text-muted);
+            box-shadow: -2px 2px 5px rgba(0,0,0,0.05);
+            z-index: 46;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth movement */
+        }
+        /* When panel is collapsed, button moves to far right */
+        .objects-panel.collapsed ~ .panel-toggle-btn,
+        .workspace:has(.objects-panel.collapsed) .panel-toggle-btn {
+            right: 0; 
+        }
+        
+        .panel-toggle-btn:hover { color: var(--primary); background: white; }
+        
+        /* Status Bar Overlay */
+        #status-overlay {
+            position: absolute;
+            bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.8);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(4px);
+            pointer-events: none;
+            opacity: 0; transition: opacity 0.3s;
+        }
+        #status-overlay.visible { opacity: 1; }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .header-controls { display: none; /* Hide sliders on small screens or move to modal */ }
+            .objects-panel { position: absolute; right: 0; height: 100%; box-shadow: -5px 0 15px rgba(0,0,0,0.2); }
+            .floating-toolbox { left: 10px; }
+        }
+    </style>
+
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-left">
+            <div class="brand-title">
+                <i class="fa-solid fa-cube brand-icon"></i> <!-- آیکون مکعب برای 3D -->
+                Map-to-3D Studio
+            </div>
+            <!-- اضافه کردن بردکرامب برای حس حرفه‌ای بودن -->
+            <span class="project-breadcrumb">Project_ID : {{project_name}}</span>
+        </div>
+    
+        <div class="header-actions">
+            <input type="file" id="mapFile" accept="image/*" style="display:none;">
+            <button class="btn-header btn-secondary-header" onclick="document.getElementById('mapFile').click()">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Load Map
+            </button>
+            
+            <div class="divider-v"></div>
+    
+            <button class="btn-header btn-secondary-header" onclick="saveWalls()">
+                <i class="fa-solid fa-layer-group"></i> Save Walls
+            </button>
+            
+            <!-- دکمه Save Rooms با استایل متفاوت اما هماهنگ -->
+            <button class="btn-header btn-secondary-header" onclick="saveRooms()">
+                <i class="fa-solid fa-house-chimney"></i> Save Rooms
+            </button>
+    
+            <div class="divider-v"></div>
+    
+            <button id="downloadLink" class="btn-header btn-secondary-header" onclick="exportSh3d(event)">
+                <i class="fa-solid fa-file-export"></i> Export
+            </button>
+        </div>
+    </header>    
+    <!-- <header class="app-header">
+        <div class="header-left">
+            <h2><i class="fa-solid fa-map-location-dot" style="color: var(--primary);"></i> Map-to-3D Interactive Editor</h2>
+        </div>        
+        <div class="header-controls">
+            <div>
+            </div>
+        </div>
+        <div style="height: 20px; width: 1px; background: var(--border); margin: 0 5px;"></div>
+
+        <input type="file" id="mapFile" accept="image/*" style="display:none;">
+        <button class="btn btn-secondary" onclick="document.getElementById('mapFile').click()">
+            <i class="fa-solid fa-cloud-arrow-down"></i> Load Map
+        </button>
+        <button class="btn btn-primary" onclick="saveWalls()"><i class="fa-solid fa-floppy-disk"></i> Save Walls</button>
+        <button class="btn btn-success" onclick="saveRooms()"><i class="fa-solid fa-house-chimney"></i> Save Rooms</button>
+        <a id="downloadLink" class="btn btn-secondary" style="" onclick="exportSh3d(event)"><i class="fa-solid fa-file-export"></i> Export .sh3d</a>
+    
+    </header>
+ -->
+    <!-- Main Workspace -->
+    <div class="workspace">
+        <!-- Floating Toolbox -->
+        <div class="floating-toolbox">
+            <button class="tool-btn active" data-tool="select" title="Select"><i class="fa-solid fa-arrow-pointer"></i></button>
+            <button class="tool-btn" data-tool="line" title="Draw Wall"><i class="fa-solid fa-slash"></i></button>
+            <button class="tool-btn" data-tool="rectangle" title="Draw Room"><i class="fa-regular fa-square"></i></button>
+            <div class="tool-divider"></div>
+            <button class="tool-btn" onclick="detectWalls()" title="AI Detect Walls" style="color:var(--primary);"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
+            <button class="tool-btn" onclick="detectRooms()" title="AI Detect Rooms" style="color:var(--success);"><i class="fa-solid fa-crop-simple"></i></button>
+        </div>
+
+        <!-- Canvas Area -->
+        <div class="canvas-container">
+            <div class="canvas-wrapper" id="canvasWrapper">
+                <canvas id="previewCanvas" width="800" height="600"></canvas>
+            </div>
+            <div id="status-overlay">Status Message</div>
+        </div>
+
+        <!-- Toggle Button (MOVED OUTSIDE PANEL) -->
+        <div class="panel-toggle-btn" onclick="togglePanel()" title="Toggle Panel">
+            <i class="fa-solid fa-chevron-right" id="toggleIcon"></i>
+        </div>
+
+        <!-- Right Sidebar (Objects) -->
+        <div class="objects-panel" id="objectsPanel">
+            <div class="panel-header">
+                <span><i class="fa-solid fa-list-check"></i> Objects</span>
+            </div>
+
+            <div class="panel-content">
+                
+                <!-- Accordion: Walls -->
+                <div class="accordion-item">
+                    <div class="accordion-header active" onclick="toggleAccordion(this)">
+                        <span>WALLS</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-body open">
+                        <div class="accordion-content" id="wallsList">
+                            <div style="color:#64748b; text-align:center; font-size:0.85rem; padding:10px;">No walls detected</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accordion: Rooms -->
+                <div class="accordion-item">
+                    <div class="accordion-header active" onclick="toggleAccordion(this)">
+                        <span>ROOMS</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-body open">
+                        <div class="accordion-content" id="roomsList">
+                            <div style="color:#64748b; text-align:center; font-size:0.85rem; padding:10px;">No rooms detected</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accordion: Settings -->
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>SETTINGS</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-body">
+                        <!-- <div class="accordion-content">
+                            <p style="font-size:0.8rem; color:#94a3b8;">Additional settings can go here.</p>
+                            <div class="slider-group">
+                                <label>Brightness <span id="brightnessVal">100%</span></label>
+                                <input type="range" id="brightness" min="0" max="200" value="100" oninput="updatePreview()">
+                            </div>
+                            <div class="slider-group">
+                                <label>Contrast <span id="contrastVal">100%</span></label>
+                                <input type="range" id="contrast" min="0" max="300" value="100" oninput="updatePreview()">
+                            </div>
+
+                        </div> -->
+                        <div class="accordion-content settings-group">
+    
+                            <!-- آیتم Brightness -->
+                            <div class="setting-item">
+                                <div class="setting-label-row">
+                                    <span>Brightness</span>
+                                    <span id="brightnessVal" class="setting-value">100%</span>
+                                </div>
+                                <input type="range" id="brightness" class="modern-slider" 
+                                       min="0" max="200" value="100" 
+                                       oninput="updatePreview(); document.getElementById('brightnessVal').innerText = this.value + '%'">
+                            </div>
+                        
+                            <!-- آیتم Contrast -->
+                            <div class="setting-item">
+                                <div class="setting-label-row">
+                                    <span>Contrast</span>
+                                    <span id="contrastVal" class="setting-value">100%</span>
+                                </div>
+                                <input type="range" id="contrast" class="modern-slider" 
+                                       min="0" max="300" value="100" 
+                                       oninput="updatePreview(); document.getElementById('contrastVal').innerText = this.value + '%'">
+                            </div>
+                        
+                        </div>                        
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- <div class="container layout" style="max-width: 1400px; margin: 0 auto; padding: 20px;">
+        <div class="card" style="flex: 1;">
+
+            
+            <div class="editor-container">
+            </div>
+
+            <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: flex-end;">
+                <button class="btn btn-primary" onclick="saveProjectData()"><i class="fa-solid fa-floppy-disk"></i> Save to Database</button>
+                <a id="downloadLink" class="btn btn-success" style="display:none;" onclick="exportSh3d(event)"><i class="fa-solid fa-file-export"></i> Export .sh3d</a>
+            </div>
+            <div id="status" style="margin-top: 10px; font-weight: 500;"></div>
+        </div>
+
+        <div class="debug-panel" style="width: 320px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; padding-bottom:10px; border-bottom:1px solid #334155;">
+                <span style="font-weight:600; color:white;"><i class="fa-solid fa-terminal"></i> OBJECT INSPECTOR</span>
+                <span id="wallCountBadge" style="background:#334155; color:#94a3b8; padding:4px 10px; border-radius:20px; font-size:0.75rem;">0 objects</span>
+            </div>
+            
+            <div style="color: #60a5fa; margin: 1.5rem 0 0.5rem 0; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; letter-spacing: 1px;">Detected & Drawn Walls</div>
+
+            <div style="color: #60a5fa; margin: 1.5rem 0 0.5rem 0; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; letter-spacing: 1px;">Detected Rooms</div>
+        </div>
+    </div> -->
+
+    <!-- Room Properties Modal -->
+    <div id="roomModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center;">
+        <div style="background:#1e293b; padding:25px; border-radius:12px; width:450px; max-width:90%; box-shadow:0 10px 25px rgba(0,0,0,0.5); color:#fff;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #334155; padding-bottom:10px;">
+                <h3 style="margin:0; font-size:1.2rem;"><i class="fa-solid fa-house-chimney"></i> Room Properties</h3>
+                <button onclick="closeRoomModal()" style="background:none; border:none; color:#94a3b8; font-size:1.2rem; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
+                <div>
+                    <label style="font-size:0.85rem; color:#94a3b8; display:block; margin-bottom:4px;">Room Type (Combo Box)</label>
+                    <select id="modalRoomType" onchange="updateRoomTypeOnServer()" style="width:100%; padding:8px; background:#0f172a; border:1px solid #334155; color:#fff; border-radius:6px;">
+                        <option value="-">Select Space Type</option>
+                        <option value="Living Room">Living Room</option>
+                        <option value="Bedroom">Bedroom</option>
+                        <option value="Kitchen">Kitchen</option>
+                        <option value="Bathroom">Bathroom</option>
+                        <option value="Corridor">Corridor</option>
+                        <option value="Balcony">Balcony</option>
+                        <option value="Storage">Storage</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1;">
+                        <label style="font-size:0.85rem; color:#94a3b8; display:block; margin-bottom:4px;">Floor Area (m²)</label>
+                        <input type="text" id="modalRoomArea" readonly style="width:100%; padding:8px; background:#0f172a; border:1px solid #334155; color:#94a3b8; border-radius:6px;">
+                    </div>
+                    <div style="flex:1;">
+                        <label style="font-size:0.85rem; color:#94a3b8; display:block; margin-bottom:4px;">Perimeter (m)</label>
+                        <input type="text" id="modalRoomPerimeter" readonly style="width:100%; padding:8px; background:#0f172a; border:1px solid #334155; color:#94a3b8; border-radius:6px;">
+                    </div>
+                </div>
+
+                <div>
+                    <label style="font-size:0.85rem; color:#94a3b8; display:block; margin-bottom:4px;">Related Objects / Items</label>
+                    <div id="modalRelatedObjects" style="max-height:120px; overflow-y:auto; background:#0f172a; border:1px solid #334155; border-radius:6px; padding:6px;">
+                        <!-- لیست اشیاء مرتبط -->
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                <button class="btn btn-secondary" onclick="closeRoomModal()">Close</button>
+                <button class="btn btn-primary" onclick="saveRoomProperties()">Save & Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/plan/plan.js"></script>
+
+    <script>
+        // --- UI Logic ---
+
+        // Toggle Right Panel
+        function togglePanel() {
+            const panel = document.getElementById('objectsPanel');
+            const icon = document.getElementById('toggleIcon');
+            panel.classList.toggle('collapsed');
+            
+            if(panel.classList.contains('collapsed')) {
+                icon.classList.remove('fa-chevron-right');
+                icon.classList.add('fa-chevron-left');
+            } else {
+                icon.classList.remove('fa-chevron-left');
+                icon.classList.add('fa-chevron-right');
+            }
+            
+            // Trigger resize event for canvas if needed
+            setTimeout(() => window.dispatchEvent(new Event('resize')), 300);
+        }
+
+        // Toggle Accordions inside Panel
+        function toggleAccordion(header) {
+            header.classList.toggle('active');
+            const body = header.nextElementSibling;
+            body.classList.toggle('open');
+        }
+
+        // Helper for file input styling
+        function handleFileSelect(input) {
+            if (input.files && input.files[0]) {
+                // Trigger the original logic from plan.js if it listens to 'change' on #mapFile
+                // Since we moved the input, we might need to dispatch event or call logic directly
+                const event = new Event('change');
+                document.getElementById('mapFile').dispatchEvent(event); 
+            }
+        }
+
+        // Override setStatus to use the new overlay
+        const originalSetStatus = window.setStatus;
+        window.setStatus = function(msg, type) {
+            const el = document.getElementById('status-overlay');
+            el.textContent = msg;
+            el.style.backgroundColor = type === 'error' ? 'rgba(239, 68, 68, 0.9)' : (type === 'success' ? 'rgba(16, 185, 129, 0.9)' : 'rgba(15, 23, 42, 0.8)');
+            el.classList.add('visible');
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                el.classList.remove('visible');
+            }, 3000);
+        }
+    </script>
+
+</body>
+</html>

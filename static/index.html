@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Project Manager</title>
+    <link rel="stylesheet" href="/static/assets/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1><i class="fa-solid fa-folder-open"></i> Project Manager</h1>
+            
+            <!-- فرم ایجاد پروژه جدید -->
+            <div style="display: flex; gap: 10px; margin-bottom: 2rem;">
+                <input type="text" id="newProjectName" placeholder="Enter project name...">
+                <button class="btn btn-primary" onclick="createProject()">Create</button>
+            </div>
+
+            <!-- لیست پروژه‌ها -->
+            <div id="projectList">
+                <!-- پروژه‌ها اینجا لود می‌شوند -->
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/assets/app.js"></script>
+    <script>
+        async function loadProjects() {
+            // درخواست به اندپوینت API برای دریافت لیست پروژه‌ها
+            const projects = await apiRequest('/project/');
+            const list = document.getElementById('projectList');
+            
+            if (!projects || projects.length === 0) {
+                list.innerHTML = '<p style="text-align:center; color:#666;">No projects found. Create one to get started!</p>';
+                return;
+            }
+
+            // نمایش هر پروژه با لینک به روت جدید /project/{id}
+            list.innerHTML = projects.map(p => `
+                <div class="card" style="padding: 1.5rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <div>
+                        <h3 style="margin-bottom: 0.2rem;">${p.name}</h3>
+                        <small style="color: #666;">ID: ${p.id} | Created: ${new Date(p.created_at).toLocaleDateString()}</small>
+                    </div>
+                    <!-- تغییر لینک به روت داینامیک -->
+                    <a href="/project/${p.id}" class="btn btn-success">
+                        Open Plan <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            `).join('');
+        }
+
+        async function createProject() {
+            const nameInput = document.getElementById('newProjectName');
+            const name = nameInput.value.trim();
+            
+            if (!name) return alert("Project name is required");
+            
+            const res = await apiRequest('/project/', 'POST', { 
+                name: name, 
+                currency: "USD" 
+            });
+            
+            if (res) {
+                nameInput.value = '';
+                loadProjects(); // رفرش لیست
+            }
+        }
+
+        // لود اولیه لیست پروژه‌ها
+        document.addEventListener('DOMContentLoaded', loadProjects);
+    </script>
+</body>
+</html>

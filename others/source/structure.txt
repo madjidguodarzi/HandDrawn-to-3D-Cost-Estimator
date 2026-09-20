@@ -1,0 +1,310 @@
+map-to-3d/
+├── backend
+│   ├── app
+│   │   ├── api
+│   │   │   ├── maps
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── export.py
+│   │   │   │   │   └── async def export_sh3d(walls, rooms):
+│   │   │   │   ├── rooms.py
+│   │   │   │   │   └── async def detect_rooms(walls):
+│   │   │   │   └── walls.py
+│   │   │   │       └── async def detect_walls(file, brightness, contrast):
+│   │   │   ├── projects
+│   │   │   │   ├── base.py
+│   │   │   │   │   ├── def create_project(project_in, db):
+│   │   │   │   │   ├── def read_projects(skip, limit, db):
+│   │   │   │   │   ├── def read_project(project_id, db):
+│   │   │   │   │   ├── def update_project(project_id, project_in, db):
+│   │   │   │   │   └── def delete_project(project_id, db):
+│   │   │   │   ├── ml.py
+│   │   │   │   │   ├── def ml_generate(num_samples):
+│   │   │   │   │   ├── def ml_train():
+│   │   │   │   │   ├── def evaluate_model():
+│   │   │   │   │   ├── class ItemEstimateRequest(BaseModel):
+│   │   │   │   │   └── def estimate_item_cost(request):
+│   │   │   │   ├── object_costs.py
+│   │   │   │   │   ├── def _get_relation(db, project_id, object_id):
+│   │   │   │   │   ├── def list_object_costs(project_id, object_id, db):
+│   │   │   │   │   ├── def create_object_cost(project_id, object_id, cost_in, db):
+│   │   │   │   │   ├── def get_object_cost(project_id, object_id, cost_id, db):
+│   │   │   │   │   ├── def update_object_cost(project_id, object_id, cost_id, cost_in, db):
+│   │   │   │   │   └── def delete_object_cost(project_id, object_id, cost_id, db):
+│   │   │   │   ├── plan.py
+│   │   │   │   │   ├── def get_project_plan(project_id, db):
+│   │   │   │   │   └── async def update_project_plan(project_id, file, db):
+│   │   │   │   ├── reports.py
+│   │   │   │   │   └── def generate_ai_report(request, db):
+│   │   │   │   ├── rooms.py
+│   │   │   │   │   ├── def list_rooms(project_id, db):
+│   │   │   │   │   ├── def create_room(project_id, room_in, db):
+│   │   │   │   │   ├── def create_rooms_batch(project_id, rooms_in, db):
+│   │   │   │   │   ├── def get_room(project_id, room_id, db):
+│   │   │   │   │   ├── def update_room(project_id, room_id, room_in, db):
+│   │   │   │   │   ├── def delete_room(project_id, room_id, db):
+│   │   │   │   │   └── def suggest_room_costs(project_id, room_id, request, db):
+│   │   │   │   └── walls.py
+│   │   │   │       ├── def list_walls(project_id, db):
+│   │   │   │       ├── def create_wall(project_id, wall_in, db):
+│   │   │   │       ├── def create_walls_batch(project_id, walls_in, db):
+│   │   │   │       ├── def get_wall(project_id, wall_id, db):
+│   │   │   │       ├── def update_wall(project_id, wall_id, wall_in, db):
+│   │   │   │       └── def delete_wall(project_id, wall_id, db):
+│   │   │   ├── __init__.py
+│   │   │   └── ui.py
+│   │   │       ├── async def read_root():
+│   │   │       ├── async def project_plan_page(request, project_id):
+│   │   │       ├── async def object_cost_page(project_id, object_id):
+│   │   │       └── async def wall_cost_page(project_id):
+│   │   ├── core
+│   │   │   ├── image
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── line_extractor.py
+│   │   │   │   │   ├── class LineExtractor:
+│   │   │   │   │   ├──     def __init__(self):
+│   │   │   │   │   ├──     def _detect_lines(self, binary_img):
+│   │   │   │   │   ├──     def _standardize_angles(self, lines):
+│   │   │   │   │   ├──     def _merge_collinear_lines(self, lines):
+│   │   │   │   │   ├──     def _extend_and_rebuild(self, lines):
+│   │   │   │   │   ├──     def _solve_line_intersection(l1, l2):
+│   │   │   │   │   ├──     def _is_point_on_segment(px, py, seg):
+│   │   │   │   │   ├──     def _are_similar(self, l1, l2):
+│   │   │   │   │   ├──     def _point_to_line_distance(px, py, x1, y1, x2, y2):
+│   │   │   │   │   ├──     def _extend_line(line1, line2):
+│   │   │   │   │   └──     def process_line(self, image_path, brightness, contrast):
+│   │   │   │   └── preprocessor.py
+│   │   │   │       ├── class ImageProcessor:
+│   │   │   │       ├──     def __init__(self):
+│   │   │   │       ├──     def _adjust_brightness_contrast(self, img, brightness, contrast):
+│   │   │   │       ├──     def _preprocess(self, img):
+│   │   │   │       └──     def process_image(self, image_path, brightness, contrast):
+│   │   │   ├── __init__.py
+│   │   │   ├── config.py
+│   │   │   │   ├── class Settings(BaseSettings):
+│   │   │   │   └──     class Config:
+│   │   │   ├── room_detector.py
+│   │   │   │   ├── class RoomDetector:
+│   │   │   │   ├──     def __init__(self, min_room_area):
+│   │   │   │   ├──     def detect_rooms(self, walls):
+│   │   │   │   └──     def _calculate_polygon_area(points):
+│   │   │   └── sh3d_exporter.py
+│   │   │       ├── class SH3DExporter:
+│   │   │       ├──     def __init__(self):
+│   │   │       └──     def export_to_sh3d(self, lines, output_path):
+│   │   ├── models
+│   │   │   ├── __init__.py
+│   │   │   ├── base.py
+│   │   │   │   └── class Base(DeclarativeBase):
+│   │   │   ├── cost_item.py
+│   │   │   │   ├── class UnitEnum(str, <ast.Attribute object at 0x7d33dd95ae10>):
+│   │   │   │   ├── class CostItem(Base):
+│   │   │   │   └── def receive_before_insert(mapper, connection, target):
+│   │   │   ├── project.py
+│   │   │   │   └── class Project(Base):
+│   │   │   ├── room.py
+│   │   │   │   ├── class Room(Base):
+│   │   │   │   └──     def related_objects(self):
+│   │   │   ├── room_coordinate.py
+│   │   │   │   └── class RoomCoordinate(Base):
+│   │   │   ├── room_objects.py
+│   │   │   │   ├── class ObjectTypeEnum(str, <ast.Attribute object at 0x7d33dd95b310>):
+│   │   │   │   └── class RoomObject(Base):
+│   │   │   └── wall.py
+│   │   │       └── class Wall(Base):
+│   │   ├── repositories
+│   │   │   ├── __init__.py
+│   │   │   ├── cost_item_repo.py
+│   │   │   │   ├── class CostItemRepository:
+│   │   │   │   ├──     def create(db, obj_in):
+│   │   │   │   ├──     def get_by_id(db, id):
+│   │   │   │   ├──     def update(db, db_obj, obj_in):
+│   │   │   │   └──     def delete(db, db_obj):
+│   │   │   ├── project_repo.py
+│   │   │   │   ├── class ProjectRepository:
+│   │   │   │   ├──     def create(db, obj_in):
+│   │   │   │   ├──     def get_by_id(db, id):
+│   │   │   │   ├──     def get_all(db, skip, limit):
+│   │   │   │   ├──     def update(db, db_obj, obj_in):
+│   │   │   │   └──     def delete(db, db_obj):
+│   │   │   ├── room_repo.py
+│   │   │   │   ├── class RoomRepository:
+│   │   │   │   ├──     def create(db, obj_in):
+│   │   │   │   ├──     def create_batch(db, project_id, rooms_data):
+│   │   │   │   ├──     def get_by_id(db, id):
+│   │   │   │   ├──     def get_by_project(db, project_id):
+│   │   │   │   ├──     def update(db, db_obj, obj_in):
+│   │   │   │   └──     def delete(db, db_obj):
+│   │   │   └── wall_repo.py
+│   │   │       ├── class WallRepository:
+│   │   │       ├──     def create(db, project_id, wall_data):
+│   │   │       ├──     def create_batch(db, project_id, walls_data):
+│   │   │       ├──     def get_by_id(db, id):
+│   │   │       ├──     def get_by_project(db, project_id):
+│   │   │       ├──     def update(db, db_obj, obj_in):
+│   │   │       └──     def delete(db, db_obj):
+│   │   ├── schemas
+│   │   │   ├── __init__.py
+│   │   │   ├── cost_item.py
+│   │   │   │   ├── class CostItemBase(BaseModel):
+│   │   │   │   ├── class CostItemCreate(CostItemBase):
+│   │   │   │   ├── class CostItemUpdate(BaseModel):
+│   │   │   │   ├── class CostItemRead(CostItemBase):
+│   │   │   │   ├── class WallRoomRelationCreate(BaseModel):
+│   │   │   │   ├── class WallRoomRelationRead(BaseModel):
+│   │   │   │   ├── class CostSuggestion(BaseModel):
+│   │   │   │   ├── class RoomCostSuggestionRequest(BaseModel):
+│   │   │   │   └── class RoomCostSuggestionResponse(BaseModel):
+│   │   │   ├── ml_schema.py
+│   │   │   │   ├── class CostEstimationRequest(BaseModel):
+│   │   │   │   └── class CostEstimationResponse(BaseModel):
+│   │   │   ├── plan.py
+│   │   │   │   ├── class PlanRead(BaseModel):
+│   │   │   │   └── class PlanUpdate(BaseModel):
+│   │   │   ├── project.py
+│   │   │   │   ├── class ProjectBase(BaseModel):
+│   │   │   │   ├── class ProjectCreate(ProjectBase):
+│   │   │   │   ├── class ProjectUpdate(BaseModel):
+│   │   │   │   └── class ProjectRead(ProjectBase):
+│   │   │   ├── report.py
+│   │   │   │   ├── class ReportRequest(BaseModel):
+│   │   │   │   └── class ReportResponse(BaseModel):
+│   │   │   ├── room.py
+│   │   │   │   ├── class RoomCoordinateItem(BaseModel):
+│   │   │   │   ├── class RelatedObject(BaseModel):
+│   │   │   │   ├── class CostItemBrief(BaseModel):
+│   │   │   │   ├── class RoomBase(BaseModel):
+│   │   │   │   ├── class RoomCreate(RoomBase):
+│   │   │   │   ├── class RoomUpdate(BaseModel):
+│   │   │   │   └── class RoomRead(RoomBase):
+│   │   │   ├── room_object.py
+│   │   │   │   ├── class RoomObjectBase(BaseModel):
+│   │   │   │   ├── class RoomObjectCreate(RoomObjectBase):
+│   │   │   │   ├── class RoomObjectUpdate(BaseModel):
+│   │   │   │   └── class RoomObjectRead(RoomObjectBase):
+│   │   │   └── wall.py
+│   │   │       ├── class WallBase(BaseModel):
+│   │   │       ├──     def compute_geometry(self):
+│   │   │       ├── class WallCreate(WallBase):
+│   │   │       ├── class WallUpdate(BaseModel):
+│   │   │       └── class WallRead(WallBase):
+│   │   ├── services
+│   │   │   ├── maps
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── export.py
+│   │   │   │   │   ├── class ExportProcessingService:
+│   │   │   │   │   └──     def generate_sh3d(walls, rooms):
+│   │   │   │   ├── rooms.py
+│   │   │   │   │   ├── class RoomProcessingService:
+│   │   │   │   │   └──     def detect_rooms(walls):
+│   │   │   │   └── walls.py
+│   │   │   │       ├── class WallProcessingService:
+│   │   │   │       └──     def detect_walls(image_bytes, brightness, contrast):
+│   │   │   ├── projects
+│   │   │   │   ├── cost_suggestion_service.py
+│   │   │   │   │   ├── class CostSuggestionService:
+│   │   │   │   │   ├──     def suggest_and_create(db, project_id, room_id, room_type):
+│   │   │   │   │   └──     def _calculate_quantity(relation, room):
+│   │   │   │   ├── cost_templates.py
+│   │   │   │   │   └── def get_template(room_type, object_type):
+│   │   │   │   ├── data_generator.py
+│   │   │   │   │   └── def generate_synthetic_data(num_samples):
+│   │   │   │   ├── ml_estimator.py
+│   │   │   │   │   ├── class CostEstimator:
+│   │   │   │   │   ├──     def __init__(self):
+│   │   │   │   │   ├──     def _make_slug(text):
+│   │   │   │   │   ├──     def _ensure_model_loaded(self, slug):
+│   │   │   │   │   ├──     def train_from_csv(self, csv_path):
+│   │   │   │   │   └──     def estimate_item_cost(self, item_name, area_m2, room_type, quality):
+│   │   │   │   ├── plan_service.py
+│   │   │   │   │   ├── class PlanService:
+│   │   │   │   │   ├──     async def upload_plan(db, project_id, file):
+│   │   │   │   │   └──     def get_plan(db, project_id):
+│   │   │   │   ├── project_service.py
+│   │   │   │   │   ├── class ProjectService:
+│   │   │   │   │   ├──     def create(db, obj_in):
+│   │   │   │   │   ├──     def get(db, project_id):
+│   │   │   │   │   ├──     def list(db, skip, limit):
+│   │   │   │   │   ├──     def update(db, project_id, obj_in):
+│   │   │   │   │   └──     def delete(db, project_id):
+│   │   │   │   └── report_service.py
+│   │   │   │       ├── class ReportService:
+│   │   │   │       ├──     def call_local_llm(prompt):
+│   │   │   │       ├──     def generate_and_execute_report(db, request):
+│   │   │   │       └──     def _is_safe_sql(sql):
+│   │   │   └── __init__.py
+│   │   ├── __init__.py
+│   │   └── database.py
+│   │       ├── def get_db():
+│   │       └── def init_db():
+│   └── app_new
+│       ├── image_preprocessor.py
+│       │   ├── class ImagePreprocessor:
+│       │   ├──     def __init__(self, adaptive_block_size, adaptive_c):
+│       │   ├──     def load_and_adjust(self, image_path, brightness, contrast):
+│       │   ├──     def preprocess_to_binary(self, img):
+│       │   └──     def _adjust_brightness_contrast(img, brightness, contrast):
+│       ├── line_extractor.py
+│       │   ├── class LineExtractor:
+│       │   ├──     def __init__(self, hough_threshold, min_line_length, max_line_gap):
+│       │   └──     def detect_lines(self, binary_img):
+│       └── wall_reconstructor.py
+│           ├── class WallReconstructor:
+│           ├──     def __init__(self, angle_tolerance, merge_distance, extension_margin, min_segment_length):
+│           ├──     def process_lines(self, raw_lines):
+│           ├──     def _standardize_angles_shapely(self, lines):
+│           ├──     def _merge_collinear_shapely(self, lines):
+│           ├──     def _are_collinear_and_close(self, l1, l2):
+│           ├──     def _get_farthest_points(points):
+│           └──     def _extend_intersect_and_split(self, lines):
+├── data
+│   ├── samples
+│   │   ├── furniture
+│   │   │   ├── phone
+│   │   │   │   └── cisco-7945
+│   │   │   └── sofa
+│   │   │       ├── L-Shape-01
+│   │   │       ├── L-Shape-02
+│   │   │       └── wooden-01
+│   │   └── palns
+│   └── screen-shots
+├── frontend
+├── others
+│   ├── docs
+│   └── source
+│       └── serilize.py
+│           ├── def should_include(path):
+│           ├── def generate_structure(output_file):
+│           ├── def save_sources_to_json(output_file):
+│           └── def create_backup():
+├── static
+│   ├── __project__
+│   │   ├── app.js
+│   │   ├── index.html
+│   │   └── styles.css
+│   ├── assets
+│   │   ├── app.js
+│   │   └── style.css
+│   ├── plan
+│   │   ├── cost
+│   │   │   ├── cost.js
+│   │   │   └── index.html
+│   │   ├── old-1
+│   │   │   ├── index.html
+│   │   │   └── plan.js
+│   │   ├── old-2
+│   │   ├── index.html
+│   │   └── plan.js
+│   ├── report
+│   │   ├── index.html
+│   │   ├── report.js
+│   │   └── style.css
+│   ├── cost.html
+│   └── index.html
+├── storage
+│   └── ml_models
+│       ├── encoders
+│       └── items
+├── temp
+├── main.py
+│   └── async def lifespan(app):
+└── requirements.txt

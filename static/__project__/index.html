@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Construction Cost Estimator & 3D Mapper - Interactive</title>
+    <link rel="stylesheet" href="/static/project/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">    
+</head>
+<body>
+    <div class="container">
+        <!-- Main Preview Area -->
+        <div class="main-panel">
+            <h2>Hand-Drawn Map to 3D</h2>
+            <p class="subtitle">1. Detect Walls → 2. Edit Walls → 3. Detect Rooms</p>
+
+            <div class="sliders">
+                <div class="slider-group">
+                    <label>Brightness <span id="brightnessVal">100%</span></label>
+                    <input type="range" id="brightness" min="0" max="200" value="100" oninput="updatePreview()">
+                </div>
+                <div class="slider-group">
+                    <label>Contrast <span id="contrastVal">100%</span></label>
+                    <input type="range" id="contrast" min="0" max="300" value="100" oninput="updatePreview()">
+                </div>
+            </div>
+
+            <div class="controls">
+                <input type="file" id="mapFile" accept="image/*">
+                <button id="detectWallBtn" class="btn-primary" onclick="detectWalls()">1. Detect Walls</button>
+                <button id="detectRoomBtn" class="btn-success" onclick="detectRooms()" disabled>2. Detect Rooms</button>
+                <button class="btn-danger" onclick="clearDrawingsOnly()">🗑️ Clear All</button>
+                <button id="saveProjectBtn" class="btn-primary" onclick="saveProjectToDB()" style="margin-left: 10px;"><i class="fa-solid fa-save"></i> Save Project</button>
+            </div>
+
+            <div class="canvas-wrapper" id="canvasWrapper">
+                <span class="placeholder-text" id="placeholder">No image loaded</span>
+                <canvas id="previewCanvas"></canvas>
+            </div>
+
+            <div id="status"></div>
+            <a id="download-link" href="#" style="display:none;" onclick="downloadSh3d(event)">⬇ Download .sh3d File</a>
+        </div>
+
+        <!-- Debug Panel -->
+        <div class="debug-panel">
+            <div class="debug-header">
+                <span>🔍 DEBUG CONSOLE</span>
+                <span id="wallCountBadge" style="background:#333; padding:2px 8px; border-radius:10px; font-size:0.75rem;">0 walls</span>
+            </div>
+            
+            <div class="debug-content" id="debugContent">
+                <div class="debug-empty">Waiting for detection...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/project/app.js"></script>
+</body>
+</html>

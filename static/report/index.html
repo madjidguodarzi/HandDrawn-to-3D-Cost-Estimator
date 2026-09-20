@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Cost Analyst</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/report/style.css">
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="chat-header">
+        <div class="status-dot"></div>
+        <h2>AI Cost Analyst</h2>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+        <!-- Welcome Message -->
+        <div class="message ai">
+            Hello! I can help you analyze project costs. <br>
+            Try asking: <br>
+            • "What is the total cost for the Kitchen?" <br>
+            • "Show me all wall items in Project Villa A"
+        </div>
+    </div>
+
+    <div class="typing-indicator" id="typingIndicator">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+    </div>
+
+    <div class="input-area">
+        <!-- Quick Samples Chips -->
+        <div class="samples-section" id="samplesContainer">
+            <!-- Samples will be injected here by JS -->
+        </div>
+
+        <div class="input-row">
+            <input type="text" id="userInput" placeholder="Ask a question about your project costs..." autocomplete="off">
+            <button onclick="sendMessage()" id="sendBtn"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+</div>
+<script src="/static/report/report.js"></script>
+</body>
+</html>
