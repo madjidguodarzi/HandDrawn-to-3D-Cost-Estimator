@@ -19,6 +19,7 @@ __pycache__/
 # Database & Data
 cost_estimator.db
 data/item_training_data.csv
+data/samples/furniture
 storage/ml_models/
 
 # Temp & Uploads

@@ -1,4 +1,4 @@
-const API_BASE = "http://100.65.16.94:9000/api"; // آدرس جدید شما
+const API_BASE = "/api";
 const chatMessages = document.getElementById('chatMessages');
 const userInput = document.getElementById('userInput');
 const typingIndicator = document.getElementById('typingIndicator');
