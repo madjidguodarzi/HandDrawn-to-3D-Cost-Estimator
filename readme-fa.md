@@ -21,7 +21,7 @@
 ## 🖼️ نمای کلی سیستم (System Overview)
 
 <div align="center">
-  <img src="/assets/architecture_diagram.png" alt="Industrial AI Renovation Estimator System Architecture" width="800"/>
+  <img src="/assets/screen-shots/architecture_diagram.png" alt="Industrial AI Renovation Estimator System Architecture" width="800"/>
   <p><em>معماری سیستم: تلفیق Computer Vision، Hybrid ML Cost Engine و LLM-powered Reporting</em></p>
 </div>
 
