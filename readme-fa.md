@@ -28,7 +28,7 @@
 <div align="center">
   <table>
     <tr>
-      <td align="center"><img src="assets/screen-shots/01 - hand-drwan-map.png" alt="Map-to-3D Studio Interface" width="300"/><br><b>استودیو Map-to-3D:</b> تشخیص خودکار دیوارها و اتاق‌ها</td>
+      <td align="center"><img src="/assets/screen-shots/01 - hand-drwan-map.png" alt="Map-to-3D Studio Interface" width="300"/><br><b>استودیو Map-to-3D:</b> تشخیص خودکار دیوارها و اتاق‌ها</td>
       <td align="center">AAA<img src="/assets/screen-shots/03 - cost.png" alt="Detailed Cost Sheet" width="300"/><br><b>برگه هزینه:</b> مدیریت دقیق آیتم‌ها و زمان‌بندی</td>
       <td align="center"><img src="/assets/screen-shots/04 - 3D-exported.png" alt="Sweet Home 3D Export" width="300"/><br><b>خروجی استاندارد:</b> مدل سه‌بعدی قابل ویرایش</td>
     </tr>
