@@ -48,3 +48,18 @@ def delete_project(project_id: int, db: Session = Depends(database.get_db)):
     Delete a project and all its associated data.
     """
     ProjectService.delete(db, project_id)
+
+@router.get("/{project_id}/scale", response_model=schemas.ScaleResponse)
+def get_project_scale(
+    project_id: int,
+    db: Session = Depends(database.get_db)    
+):
+    return ProjectService.get_scale(db, project_id)
+
+@router.post("/{project_id}/scale", response_model=schemas.ScaleResponse)
+def update_project_scale(
+    project_id: int, 
+    scale_data: schemas.ScaleUpdate,
+    db: Session = Depends(database.get_db)
+):
+    return ProjectService.update_scale(db, project_id, scale_data)

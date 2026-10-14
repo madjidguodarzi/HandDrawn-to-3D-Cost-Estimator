@@ -2,7 +2,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 from typing import List, Optional
-from sqlalchemy import String, Integer, DateTime, Text, func
+from sqlalchemy import String, Integer, DateTime, Text, func, Float
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.app.models.base import Base
 
@@ -18,6 +18,8 @@ class Project(Base):
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     location: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    pixels_per_meter: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
+
     currency: Mapped[str] = mapped_column(String(3), default="USD")
 
     # Stores the original floor plan image as a base64 string

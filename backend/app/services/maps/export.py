@@ -14,7 +14,11 @@ class ExportProcessingService:
     """
 
     @staticmethod
-    def generate_sh3d(walls: List[WallRead], rooms: List[RoomRead]) -> Response:
+    def generate_sh3d(
+            scaleRatio: float,
+            walls: List[WallRead],
+            rooms: List[RoomRead]
+        ) -> Response:
         """
         Generates a Sweet Home 3D file from detected walls and rooms.
 
@@ -36,7 +40,7 @@ class ExportProcessingService:
         lines = [(int(w.x1), int(w.y1), int(w.x2), int(w.y2)) for w in walls]
 
         exporter = SH3DExporter()
-        sh3d_content = exporter.export_to_sh3d(lines=lines, output_path=output_path)
+        sh3d_content = exporter.export_to_sh3d(scaleRatio, lines=lines, output_path=output_path)
 
         return Response(
             content=sh3d_content,

@@ -64,7 +64,7 @@ class SH3DExporter:
     #     ET.indent(tree, space="  ")
     #     tree.write(filename, encoding='unicode', xml_declaration=True)
 
-    def export_to_sh3d(self, lines: List[Tuple[int, int, int, int]], output_path: str) -> None:
+    def export_to_sh3d(self, scaleRatio: float, lines: List[Tuple[int, int, int, int]], output_path: str) -> None:
         """
         Generates a .sh3d file from a list of wall segments.
         
@@ -80,7 +80,7 @@ class SH3DExporter:
             "version": "7000",
             "name": "map.sh3d",
             "camera":"topCamera",
-            "wallHeight":"243.84"            
+            "wallHeight":"270.00"            
         })
 
         # --- Add UI Properties ---
@@ -160,11 +160,12 @@ class SH3DExporter:
         })
 
         # --- PASS 1: Assign IDs and store data ---
+        _scale = 100 / scaleRatio
         processed_lines = []
         for line in lines:
             x1, y1, x2, y2 = line
             # Ensure they are treated as integers if they aren't already
-            x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+            x1, y1, x2, y2 = int(x1) * _scale, int(y1) * _scale, int(x2) * _scale, int(y2) * _scale
             
             line_id = str(uuid.uuid4())
             processed_lines.append({

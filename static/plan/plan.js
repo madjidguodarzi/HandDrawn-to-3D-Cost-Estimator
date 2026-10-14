@@ -8,7 +8,7 @@ function getPathParam(param) {
 }
 
 const projectId = new URLSearchParams(window.location.search).get('id') || getPathParam('id') || 'demo_project';
-const API_BASE = ''; 
+const API_BASE = window.location.origin; 
 
 // State Variables
 let originalImage = null;
@@ -28,6 +28,11 @@ let isDrawing = false;
 let startPoint = null;
 let currentMousePos = null;
 const SNAP_DISTANCE = 15;
+
+// Calibration Variables
+let calibrationPoints = []; // Stores two points {x, y}
+let scaleRatio = 1; // Pixels per Meter (Default 1:1)
+let isCalibrating = false; // Flag to check if we are in calibration mode
 
 const canvas = document.getElementById('previewCanvas');
 const ctx = canvas.getContext('2d');
@@ -158,6 +163,61 @@ function updatePreview() {
         ctx.beginPath(); ctx.arc(currentMousePos.x, currentMousePos.y, 6, 0, Math.PI * 2);
         ctx.fillStyle = '#ef4444'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke();
     }
+
+    // Draw Calibration Line 
+    if (calibrationPoints.length > 0) {
+        const p1 = calibrationPoints[0];
+        
+        // Draw first point
+        ctx.beginPath();
+        ctx.arc(p1.x, p1.y, 6, 0, Math.PI * 2);
+        ctx.fillStyle = '#8b5cf6'; // Violet color for calibration
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Draw line to current mouse or second point
+        let endX = currentMousePos ? currentMousePos.x : p1.x;
+        let endY = currentMousePos ? currentMousePos.y : p1.y;
+        
+        if (calibrationPoints.length === 2) {
+            endX = calibrationPoints[1].x;
+            endY = calibrationPoints[1].y;
+            
+            // Display Scale Info near the line
+            const midX = (p1.x + endX) / 2;
+            const midY = (p1.y + endY) / 2;
+            const distPixels = Math.hypot(endX - p1.x, endY - p1.y);
+            const distMeters = distPixels / scaleRatio;
+            
+            ctx.fillStyle = '#8b5cf6';
+            ctx.font = 'bold 14px Inter';
+            ctx.fillText(`${distMeters.toFixed(2)} m`, midX + 10, midY - 10);
+        } else if (isCalibrating && currentMousePos) {
+             endX = currentMousePos.x;
+             endY = currentMousePos.y;
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(endX, endY);
+        ctx.strokeStyle = '#8b5cf6';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Draw second point if exists
+        if (calibrationPoints.length === 2) {
+            ctx.beginPath();
+            ctx.arc(calibrationPoints[1].x, calibrationPoints[1].y, 6, 0, Math.PI * 2);
+            ctx.fillStyle = '#8b5cf6';
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.stroke();
+        }
+    }
 }
 
 // --- Interaction Logic ---
@@ -195,7 +255,21 @@ canvas.addEventListener('click', (e) => {
         });
         highlightedLineIndex = clickedIdx; highlightedRoomIndex = -1;
         updatePreview(); renderDebugList();
+    } else if (currentTool === 'calibrate') {
+        if (calibrationPoints.length < 2) {
+            calibrationPoints.push(clickedPos);
+            if (calibrationPoints.length === 1) {
+                setStatus("Select end point...", "loading");
+            } else {
+                finishCalibration();
+            }
+        }
+        updatePreview();
+        return; // Stop other tools from executing
     }
+
+
+
 });
 
 canvas.addEventListener('mousemove', (e) => {
@@ -569,6 +643,7 @@ async function exportSh3d(e) {
             method: 'POST', 
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ 
+                scaleRatio: scaleRatio,
                 walls: wallsPayload, 
                 rooms: roomsPayload 
             })
@@ -628,6 +703,12 @@ async function loadProjectData() {
         
         if (pRes.ok) {
             const d = await pRes.json();
+
+            // if (projectData.map_scale_ratio && projectData.map_scale_ratio > 0) {
+            //     scaleRatio = projectData.map_scale_ratio;
+            //     console.log("Scale loaded from DB:", scaleRatio);
+            // }
+
             if (d.map_image_base64) {
                 originalImage = new Image();
                 let src = d.map_image_base64.startsWith('data:') ? d.map_image_base64 : `data:image/png;base64,${d.map_image_base64}`;
@@ -648,4 +729,79 @@ async function loadProjectData() {
         }
         renderDebugList();
     } catch(e) { console.error(e); }
+}
+
+// --- Calibration Logic ---
+
+function startCalibration() {
+    currentTool = 'calibrate';
+    calibrationPoints = [];
+    isCalibrating = true;
+    setStatus("Select start point on map...", "loading");
+    
+    // Update UI buttons
+    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+    // Assuming you add a button with data-tool="calibrate"
+    const calBtn = document.querySelector('.tool-btn[data-tool="calibrate"]');
+    if(calBtn) calBtn.classList.add('active');
+}
+
+async function finishCalibration() {
+    if (calibrationPoints.length !== 2) return;
+    
+    const p1 = calibrationPoints[0];
+    const p2 = calibrationPoints[1];
+    const pixelDistance = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+    
+    if (pixelDistance < 10) {
+        alert("Points are too close. Please select points further apart.");
+        calibrationPoints = [];
+        isCalibrating = false;
+        currentTool = 'select';
+        updatePreview();
+        return;
+    }
+
+    // Prompt user for real distance
+    const realDistance = prompt(`Pixel distance is ${pixelDistance.toFixed(0)}px.\nEnter the real distance in meters:`, "5.0");
+    
+    if (realDistance && !isNaN(realDistance) && parseFloat(realDistance) > 0) {
+        scaleRatio = pixelDistance / parseFloat(realDistance);
+        setStatus(`✅ Calibrated: 1m = ${scaleRatio.toFixed(2)}px`, "success");
+        try {
+            const res = await fetch(`${API_BASE}/api/project/${projectId}/scale`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ pixels_per_meter: scaleRatio })
+            });
+
+            if (!res.ok) throw new Error("Failed to save scale");
+            
+            const data = await res.json();
+            
+            // به‌روزرسانی متغیرهای سراسری
+            window.pixelsPerMeter = data.pixels_per_meter;
+            window.metersPerPixel = 1 / window.pixelsPerMeter; // متغیر کمکی برای ضرب سریع
+            
+            setStatus(`✅ Calibrated: 1m = ${window.pixelsPerMeter.toFixed(2)}px`, "success");
+        } catch (e) {
+            setStatus(`❌ Error: ${e.message}`, "error");
+            resetCalibration();
+            return;
+        }
+        
+        // Optional: Save scale to project settings via API here if needed
+    } else {
+        setStatus("❌ Invalid distance entered.", "error");
+        calibrationPoints = [];
+    }
+    
+    isCalibrating = false;
+    currentTool = 'select';
+    updatePreview();
+    
+    // Reset active tool UI
+    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+    const selectBtn = document.querySelector('.tool-btn[data-tool="select"]');
+    if(selectBtn) selectBtn.classList.add('active');
 }

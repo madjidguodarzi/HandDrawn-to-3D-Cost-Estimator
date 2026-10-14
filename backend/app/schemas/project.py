@@ -31,3 +31,15 @@ class ProjectRead(ProjectBase):
     created_at: datetime
     updated_at: datetime
     model_config = ConfigDict(from_attributes=True)
+
+class ScaleUpdate(BaseModel):
+    """
+    Model for updating the project scale.
+    pixels_per_meter must be greater than 0.
+    """
+    pixels_per_meter: float = Field(..., gt=0, description="Number of pixels representing 1 meter in reality")
+
+class ScaleResponse(BaseModel):
+    project_id: int
+    pixels_per_meter: float
+    message: str

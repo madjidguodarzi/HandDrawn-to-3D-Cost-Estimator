@@ -12,7 +12,11 @@ class WallProcessingService:
     """Orchestrates wall detection from raw image bytes."""
 
     @staticmethod
-    def detect_walls(image_bytes: bytes, brightness: float, contrast: float) -> List[WallRead]:
+    def detect_walls(
+        image_bytes: bytes,
+        brightness: float,
+        contrast: float,
+    ) -> List[WallRead]:
         """
         Processes an uploaded image to extract architectural walls.
 

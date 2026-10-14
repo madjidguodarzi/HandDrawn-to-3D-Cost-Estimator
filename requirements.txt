@@ -45,4 +45,8 @@ typing-inspection==0.4.4
 typing_extensions==4.16.0
 urllib3==2.7.0
 uvicorn==0.52.4
+<<<<<<< HEAD
 xgboost==3.4.1
+=======
+xgboost==3.4.1
+>>>>>>> bee43b1 (Update local files)

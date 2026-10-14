@@ -9,6 +9,7 @@ router = APIRouter(prefix="/export/sh3d", tags=["Process Map"])
 
 @router.post("")
 async def export_sh3d(
+    scaleRatio: float = Body(1.0),
     walls: List[WallRead] = Body(...),
     rooms: List[RoomRead] = Body(...),
 ):
@@ -22,4 +23,4 @@ async def export_sh3d(
     Returns:
         A ZIP file response containing the .sh3d project.
     """
-    return ExportProcessingService.generate_sh3d(walls, rooms)
+    return ExportProcessingService.generate_sh3d(scaleRatio, walls, rooms)

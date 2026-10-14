@@ -1,5 +1,5 @@
 from backend.app.schemas.project import (
-    ProjectBase, ProjectCreate, ProjectUpdate, ProjectRead
+    ProjectBase, ProjectCreate, ProjectUpdate, ProjectRead, ScaleResponse, ScaleUpdate
 )
 from backend.app.schemas.wall import (
     WallBase, WallCreate, WallUpdate, WallRead
@@ -18,6 +18,10 @@ from backend.app.schemas.report import (
 __all__ = [
     # Project
     "ProjectBase", "ProjectCreate", "ProjectUpdate", "ProjectRead",
+
+    # Project Scale
+    "ScaleResponse", "ScaleUpdate",
+
     # Wall
     "WallBase", "WallCreate", "WallUpdate", "WallRead",
     # Room

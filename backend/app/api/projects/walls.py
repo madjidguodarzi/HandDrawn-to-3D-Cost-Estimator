@@ -18,8 +18,9 @@ def list_walls(project_id: int, db: Session = Depends(database.get_db)):
 @router.post("/{project_id}/wall", response_model=schemas.WallRead, status_code=status.HTTP_201_CREATED)
 def create_wall(project_id: int, wall_in: schemas.WallCreate, db: Session = Depends(database.get_db)):
     """Create a single wall entry within a project."""
+    project = ProjectService.get(db, project_id)
     wall_data = wall_in.model_dump()
-    new_wall = WallRepository.create(db, project_id, wall_data)
+    new_wall = WallRepository.create(db, project_id, project.pixels_per_meter, wall_data)
     return schemas.WallRead.model_validate(new_wall).model_dump()
 
 @router.post("/{project_id}/walls", response_model=List[schemas.WallRead], status_code=status.HTTP_201_CREATED)
@@ -29,12 +30,12 @@ def create_walls_batch(
     db: Session = Depends(database.get_db),
 ):
     """Save a batch of walls after human verification."""
-    ProjectService.get(db, project_id)
+    project = ProjectService.get(db, project_id)
     walls_data = [
         w.model_dump(exclude={"id", "project_id", "created_at"}, exclude_none=True)
         for w in walls_in
     ]
-    created_walls = WallRepository.create_batch(db, project_id, walls_data)
+    created_walls = WallRepository.create_batch(db, project_id, project.pixels_per_meter, walls_data)
     return [schemas.WallRead.model_validate(w) for w in created_walls]
 
 @router.get("/{project_id}/walls/{wall_id}", response_model=schemas.WallRead)

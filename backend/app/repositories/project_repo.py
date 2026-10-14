@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from backend.app.models.project import Project
-from backend.app.schemas.project import ProjectCreate, ProjectUpdate
+from backend.app.schemas.project import ProjectCreate, ProjectUpdate, ScaleResponse
 from sqlalchemy import select
 
 class ProjectRepository:
@@ -86,3 +86,26 @@ class ProjectRepository:
         """
         db.delete(db_obj)
         db.commit()
+
+    @staticmethod
+    def get_scale(db: Session, project_id: int) -> ScaleResponse:
+        """
+        Retrieves the current scale ratio for a specific project.
+        """
+        project = self.db.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found")
+        
+        return ScaleResponse(
+            project_id=project.id,
+            pixels_per_meter=project.pixels_per_meter,
+            message="Scale retrieved successfully"
+        )
+
+    @staticmethod
+    def update_scale(db: Session, project: Project, pixels_per_meter: float) -> Project:
+        """Update the scale ratio and commit changes."""
+        project.pixels_per_meter = pixels_per_meter
+        db.commit()
+        db.refresh(project)
+        return project

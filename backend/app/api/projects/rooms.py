@@ -37,14 +37,13 @@ def create_rooms_batch(
     Bulk create rooms with their coordinates and object relations.
     This endpoint handles the atomic creation of rooms, polygons, and surface objects (walls/floors/ceilings).
     """
-    ProjectService.get(db, project_id)
-
+    project = ProjectService.get(db, project_id)
     rooms_data = [
         r.model_dump(exclude={"id", "project_id", "created_at"}, exclude_none=True)
         for r in rooms_in
     ]
 
-    created_rooms = RoomRepository.create_batch(db, project_id, rooms_data)
+    created_rooms = RoomRepository.create_batch(db, project_id, project.pixels_per_meter, rooms_data)
 
     return [schemas.RoomRead.model_validate(r) for r in created_rooms]
 
